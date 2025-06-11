@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import Question from './components/Question';
-import Result from './components/Result';
+import { Question, Result } from "./components/index.js"
 import { questions } from './data/questions';
 
 function App() {
