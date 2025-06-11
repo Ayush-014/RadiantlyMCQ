@@ -1,35 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import Question from './components/Question';
+import Result from './components/Result';
+import { questions } from './data/questions';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState([]);
+
+  const handleAnswerSelect = (selectedOption) => {
+    const isCorrect = questions[currentQuestionIndex].correctAnswer === selectedOption;
+    
+    if (isCorrect) {
+      setScore(score + 1);
+    }
+
+    setSelectedAnswers([...selectedAnswers, {
+      questionId: questions[currentQuestionIndex].id,
+      selectedOption,
+      isCorrect
+    }]);
+
+    if (currentQuestionIndex < questions.length - 1) {
+      setTimeout(() => setCurrentQuestionIndex(currentQuestionIndex + 1), 300);
+    } else {
+      setShowResult(true);
+    }
+  };
+
+  const restartQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setShowResult(false);
+    setSelectedAnswers([]);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center p-4">
+      <div className={`w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 ${showResult ? 'max-w-2xl' : ''}`}>
+        <div className="p-6">
+          <h1 className="text-3xl font-bold text-center text-purple-600 mb-2">Quiz Time</h1>
+          <div className="h-1 bg-purple-100 rounded-full mb-6">
+            <div 
+              className="h-full bg-purple-500 rounded-full transition-all duration-500"
+              style={{ width: `${((currentQuestionIndex + (showResult ? 1 : 0)) / questions.length * 100)}%` }}
+            ></div>
+          </div>
+          
+          {!showResult ? (
+            <div className="animate-fadeIn">
+              <Question 
+                question={questions[currentQuestionIndex]} 
+                onAnswerSelect={handleAnswerSelect}
+              />
+            </div>
+          ) : (
+            <div className="animate-fadeIn">
+              <Result 
+                score={score} 
+                totalQuestions={questions.length} 
+                selectedAnswers={selectedAnswers}
+                questions={questions}
+                onRestart={restartQuiz}
+              />
+            </div>
+          )}
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
